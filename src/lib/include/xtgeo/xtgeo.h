@@ -47,14 +47,14 @@ extern "C"
 /* general limits in XTGeo are recoemmended for all XTGeo data types! */
 #define UNDEF 10E32
 #define UNDEF_LIMIT 9.9E32
-#define UNDEF_INT 2000000000
-#define UNDEF_INT_LIMIT 1999999999
+#define UNDEF_INT 20000000000
+#define UNDEF_INT_LIMIT 19999999999
 
 /* specific list */
 #define UNDEF_MAP 10E32
-#define UNDEF_INT_MAP 2000000000
+#define UNDEF_INT_MAP 20000000000
 #define UNDEF_MAP_LIMIT 9.9E32
-#define UNDEF_INT_MAP_LIMIT 1999999999
+#define UNDEF_INT_MAP_LIMIT 19999999999
 #define UNDEF_MAP_STORM -999.00
 #define UNDEF_MAP_IRAP 9999900.0000 /* Irap ascii */
 #define UNDEF_MAP_IRAPB 1E30        /* Irap binary */
