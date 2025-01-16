@@ -42,36 +42,36 @@
 
 // Forward declarations of static helpers
 static struct GeoMaker *
-gm_create(long cellCountI,
-          long cellCountJ,
-          long cellCountK,
+gm_create(unsigned long cellCountI,
+          unsigned long cellCountJ,
+          unsigned long cellCountK,
           double *targetVertexBuffer,
-          long *targetConnBuffer);
+          unsigned long *targetConnBuffer);
 static void
 gm_destroy(struct GeoMaker *gm);
 static void
-gm_addVertex(struct GeoMaker *gm, long i, long j, long k, double v[3]);
-static long
+gm_addVertex(struct GeoMaker *gm, unsigned long i, unsigned long j, unsigned long k, double v[3]);
+static unsigned long
 gm_vertexCount(const struct GeoMaker *gm);
 
-long
-grdcp3d_get_vtk_esg_geometry_data(long ncol,
-                                  long nrow,
-                                  long nlay,
+unsigned long
+grdcp3d_get_vtk_esg_geometry_data(unsigned long ncol,
+                                  unsigned long nrow,
+                                  unsigned long nlay,
 
                                   double *coordsv,
-                                  long ncoordin,
+                                  unsigned long ncoordin,
                                   float *zcornsv,
-                                  long nlaycornin,
+                                  unsigned long nlaycornin,
 
                                   double *vert_arr,
-                                  long n_vert_arr,
-                                  long *conn_arr,
-                                  long n_conn_arr)
+                                  unsigned long n_vert_arr,
+                                  unsigned long *conn_arr,
+                                  unsigned long n_conn_arr)
 {
-    const long cellCount = ncol * nrow * nlay;
-    const long maxVertexCount = 8 * cellCount;
-    const long expectedConnCount = 8 * cellCount;
+    const unsigned long cellCount = ncol * nrow * nlay;
+    const unsigned long maxVertexCount = 8 * cellCount;
+    const unsigned long expectedConnCount = 8 * cellCount;
 
     if (3 * maxVertexCount > n_vert_arr) {
         throw_exception("Allocated size of vertex array is too small");
@@ -97,9 +97,9 @@ grdcp3d_get_vtk_esg_geometry_data(long ncol,
 
     struct GeoMaker *gm = gm_create(ncol, nrow, nlay, vert_arr, conn_arr);
     double crs[24];
-    for (long k = 0; k < nlay; k++) {
-        for (long j = 0; j < nrow; j++) {
-            for (long i = 0; i < ncol; i++) {
+    for (unsigned long k = 0; k < nlay; k++) {
+        for (unsigned long j = 0; j < nrow; j++) {
+            for (unsigned long i = 0; i < ncol; i++) {
                 grdcp3d_corners(i, j, k, ncol, nrow, nlay, coordsv, 0, zcornsv, 0, crs);
 
                 gm_addVertex(gm, i, j, k, &crs[0 * 3]);
@@ -114,7 +114,7 @@ grdcp3d_get_vtk_esg_geometry_data(long ncol,
         }
     }
 
-    const long finalVertexCount = gm_vertexCount(gm);
+    const unsigned long finalVertexCount = gm_vertexCount(gm);
 
     gm_destroy(gm);
     gm = NULL;
@@ -126,7 +126,7 @@ grdcp3d_get_vtk_esg_geometry_data(long ncol,
 // ====================================================================================
 
 // ------------------------------------------------------------------------------------
-static long
+static unsigned long
 coordsEqual(double a[3], double b[3])
 {
     return (a[0] == b[0] && a[1] == b[1] && a[2] == b[2]);
@@ -136,25 +136,25 @@ coordsEqual(double a[3], double b[3])
 // ====================================================================================
 typedef struct GeoMaker
 {
-    long vertexCountI;
-    long vertexCountJ;
-    long vertexCountK;
+    unsigned long vertexCountI;
+    unsigned long vertexCountJ;
+    unsigned long vertexCountK;
 
-    long *globToOutputVertIdx;
+    unsigned long *globToOutputVertIdx;
 
     double *vertexArr;
-    long numVerticesAdded;
-    long *connArr;
-    long numConnAdded;
+    unsigned long numVerticesAdded;
+    unsigned long *connArr;
+    unsigned long numConnAdded;
 } GeoMaker;
 
 // ------------------------------------------------------------------------------------
 static GeoMaker *
-gm_create(long cellCountI,
-          long cellCountJ,
-          long cellCountK,
+gm_create(unsigned long cellCountI,
+          unsigned long cellCountJ,
+          unsigned long cellCountK,
           double *targetVertexBuffer,
-          long *targetConnBuffer)
+          unsigned long *targetConnBuffer)
 {
     GeoMaker *gm = (GeoMaker *)malloc(sizeof(GeoMaker));
 
@@ -162,9 +162,9 @@ gm_create(long cellCountI,
     gm->vertexCountJ = cellCountJ + 1;
     gm->vertexCountK = cellCountK + 1;
 
-    const long maxGlobVertexIdx =
+    const unsigned long maxGlobVertexIdx =
       gm->vertexCountI * gm->vertexCountJ * gm->vertexCountK;
-    gm->globToOutputVertIdx = malloc(8 * maxGlobVertexIdx * sizeof(long));
+    gm->globToOutputVertIdx = malloc(8 * maxGlobVertexIdx * sizeof(unsigned long));
     for (int i = 0; i < 8 * maxGlobVertexIdx; i++) {
         gm->globToOutputVertIdx[i] = -1;
     }
@@ -188,20 +188,20 @@ gm_destroy(GeoMaker *gm)
 }
 
 // ------------------------------------------------------------------------------------
-static long
-gm_vertexIJKToIdx(const GeoMaker *gm, long i, long j, long k)
+static unsigned long
+gm_vertexIJKToIdx(const GeoMaker *gm, unsigned long i, unsigned long j, unsigned long k)
 {
     return k * (gm->vertexCountI * gm->vertexCountJ) + j * gm->vertexCountI + i;
 }
 
 // ------------------------------------------------------------------------------------
-static long
-gm_findVertex(const GeoMaker *gm, long i, long j, long k, double v[3])
+static unsigned long
+gm_findVertex(const GeoMaker *gm, unsigned long i, unsigned long j, unsigned long k, double v[3])
 {
-    const long globalVertexIdx = gm_vertexIJKToIdx(gm, i, j, k);
+    const unsigned long globalVertexIdx = gm_vertexIJKToIdx(gm, i, j, k);
 
     for (int offset = 0; offset < 8; offset++) {
-        const long mappedIdx = gm->globToOutputVertIdx[8 * globalVertexIdx + offset];
+        const unsigned long mappedIdx = gm->globToOutputVertIdx[8 * globalVertexIdx + offset];
         if (mappedIdx < 0) {
             return -1;
         }
@@ -215,18 +215,18 @@ gm_findVertex(const GeoMaker *gm, long i, long j, long k, double v[3])
 }
 
 // ------------------------------------------------------------------------------------
-static long
-gm_findVertexAlongIJ(const GeoMaker *gm, long i, long j, long k, double v[3])
+static unsigned long
+gm_findVertexAunsigned longIJ(const GeoMaker *gm, unsigned long i, unsigned long j, unsigned long k, double v[3])
 {
     if (k > 0) {
-        const long mappedIdx = gm_findVertex(gm, i, j, k - 1, v);
+        const unsigned long mappedIdx = gm_findVertex(gm, i, j, k - 1, v);
         if (mappedIdx >= 0) {
             return mappedIdx;
         }
     }
 
     if (k < gm->vertexCountK - 1) {
-        const long mappedIdx = gm_findVertex(gm, i, j, k + 1, v);
+        const unsigned long mappedIdx = gm_findVertex(gm, i, j, k + 1, v);
         if (mappedIdx >= 0) {
             return mappedIdx;
         }
@@ -237,16 +237,16 @@ gm_findVertexAlongIJ(const GeoMaker *gm, long i, long j, long k, double v[3])
 
 // ------------------------------------------------------------------------------------
 static void
-gm_addVertex(GeoMaker *gm, long i, long j, long k, double v[3])
+gm_addVertex(GeoMaker *gm, unsigned long i, unsigned long j, unsigned long k, double v[3])
 {
-    const long globalVertexIdx = gm_vertexIJKToIdx(gm, i, j, k);
+    const unsigned long globalVertexIdx = gm_vertexIJKToIdx(gm, i, j, k);
 
-    long mappedIdx = -1;
+    unsigned long mappedIdx = -1;
     for (int offset = 0; offset < 8; offset++) {
         mappedIdx = gm->globToOutputVertIdx[8 * globalVertexIdx + offset];
         if (mappedIdx < 0) {
             // Take a peek above and below
-            mappedIdx = gm_findVertexAlongIJ(gm, i, j, k, v);
+            mappedIdx = gm_findVertexAunsigned longIJ(gm, i, j, k, v);
             if (mappedIdx >= 0) {
                 gm->globToOutputVertIdx[8 * globalVertexIdx + offset] = mappedIdx;
                 gm->connArr[gm->numConnAdded] = mappedIdx;
@@ -274,7 +274,7 @@ gm_addVertex(GeoMaker *gm, long i, long j, long k, double v[3])
 }
 
 // ------------------------------------------------------------------------------------
-static long
+static unsigned long
 gm_vertexCount(const GeoMaker *gm)
 {
     return gm->numVerticesAdded;
