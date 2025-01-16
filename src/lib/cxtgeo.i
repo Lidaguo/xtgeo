@@ -98,23 +98,6 @@ PyDict_SetItemString(d, "XTGeoCLibError", PY_XTGeoCLibError);
     $2 = (long)len;
 %}
 
-%typemap(in) long {
-    $1 = (long)PyLong_AsLong($input);
-}
-%typemap(out) long {
-    $result = PyLong_FromLong($1);
-}
-
-%typemap(in, out) long[ ] {
-    int i;
-    PyObject* tmp;
-    int len = PyList_Size($input);
-    $1 = (long*)malloc(len * sizeof(long));
-    for (i = 0; i < len; i++) {
-        tmp = PyList_GetItem($input, i);
-        $1[i] = (long)PyLong_AsLong(tmp);
-    }
-}
 
 // numpies (1D)
 
